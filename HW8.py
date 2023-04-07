@@ -76,7 +76,6 @@ def get_highest_rating(db): #Do this through DB as well
 #Try calling your functions here
 def main():
     loaded_data = load_rest_data('South_U_Restaurants.db')
-    print(loaded_data)
 
 class TestHW8(unittest.TestCase):
     def setUp(self):
