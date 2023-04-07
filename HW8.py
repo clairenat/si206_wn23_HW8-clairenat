@@ -15,7 +15,33 @@ def load_rest_data(db):
     and each inner key is a dictionary, where the key:value pairs should be the category, 
     building, and rating for the restaurant.
     """
-    pass
+    path = os.path.dirname(os.path.abspath(__file__))
+    conn = sqlite3.connect(path+'/'+db)
+    cur = conn.cursor()
+    outer_dict = {}
+    name_lst = []
+    dict_lst = []
+    lst_of_rows = []
+    cur.execute('SELECT name, category_id, building_id, rating FROM restaurants')
+    for element in cur:
+        lst_of_rows.append(element)
+    for row in lst_of_rows:
+        new_dict = {}
+        name_lst.append(row[0])
+        cat1 = row[1]
+        buil1 = row[2]
+        category = cur.execute('SELECT category FROM categories WHERE categories.id = ?', [cat1]).fetchone()[0]
+        building = cur.execute('SELECT building FROM buildings WHERE buildings.id = ?', [buil1]).fetchone()[0]
+        new_dict['category'] = category
+        new_dict['building'] = building
+        new_dict['rating'] = row[-1]
+        dict_lst.append(new_dict)
+    for item in range(len(name_lst)):
+        key = name_lst[item]
+        value = dict_lst[item]
+        outer_dict[key] = value
+    return outer_dict
+
 
 def plot_rest_categories(db):
     """
@@ -49,7 +75,8 @@ def get_highest_rating(db): #Do this through DB as well
 
 #Try calling your functions here
 def main():
-    pass
+    loaded_data = load_rest_data('South_U_Restaurants.db')
+    print(loaded_data)
 
 class TestHW8(unittest.TestCase):
     def setUp(self):
