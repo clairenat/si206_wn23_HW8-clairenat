@@ -4,6 +4,7 @@
 # List who you have worked with on this homework:
 
 import matplotlib.pyplot as plt
+import numpy as np
 import os
 import sqlite3
 import unittest
@@ -62,6 +63,20 @@ def plot_rest_categories(db):
         id = row[0]
         count = cur.execute('SELECT COUNT(category_id) FROM restaurants WHERE restaurants.category_id = ?', [id]).fetchone()[0]
         dict[category] = count
+    flipper = sorted(dict.items(), key=lambda x: x[1])
+    y = []
+    x = []
+    for tup in flipper:
+        y.append(tup[0])
+        x.append(tup[-1])
+    y_axis = np.array(y)
+    x_axis = np.array(x)
+    plt.figure(figsize=(18,5))
+    plt.barh(y_axis, x_axis)
+    plt.xlabel('Number of Restaurants')
+    plt.ylabel('Restaurant Categories')
+    plt.title('Types of Restaurant on South University Ave')
+    plt.show()
     return dict
 
 
