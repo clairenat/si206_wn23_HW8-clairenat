@@ -120,13 +120,79 @@ def get_highest_rating(db): #Do this through DB as well
     The second bar chart displays the buildings along the y-axis and their ratings along the x-axis 
     in descending order (by rating).
     """
-    pass
+    path = os.path.dirname(os.path.abspath(__file__))
+    conn = sqlite3.connect(path+'/'+db)
+    cur = conn.cursor()
+    average_rating_by_category = {}
+    average_rating_by_building = {}
+    categories_lst = []
+    cur.execute('SELECT * FROM categories')
+    for item in cur:
+        categories_lst.append(item)
+    buildings_lst = []
+    cur.execute('SELECT * FROM buildings')
+    for element in cur:
+        buildings_lst.append(element)
+    for row in categories_lst:
+        category = row[-1]
+        id = row[0]
+        count = cur.execute('SELECT rating FROM restaurants WHERE restaurants.category_id = ?', [id]).fetchall()
+        total = 0
+        for tup in count:
+            for item in tup:
+                total += float(item)
+        num = len(count)
+        average_rating_by_category[category] = round(total/num, 2)
+    for row in buildings_lst:
+        building = row[-1]
+        id = row[0]
+        count = cur.execute('SELECT rating FROM restaurants WHERE restaurants.building_id = ?', [id]).fetchall()
+        total = 0
+        for tup in count:
+            for item in tup:
+                total += float(item)
+        num = len(count)
+        average_rating_by_building[building] = round(total/num, 2)
+    flipped_categories = sorted(average_rating_by_category.items(), key=lambda x: x[1])
+    flipped_buildings = sorted(average_rating_by_building.items(), key=lambda x: x[1])
+    x_categories = []
+    y_categories = []
+    x_buildings = []
+    y_buildings = []
+    for tup in flipped_categories:
+        y_categories.append(tup[0])
+        x_categories.append(tup[-1])
+    for tup in flipped_buildings:
+        y_buildings.append(str(tup[0]))
+        x_buildings.append(tup[-1])
+    fig = plt.figure(figsize=(10,5))
+    ax1 = fig.add_subplot(121)
+    ax2 = fig.add_subplot(122)
+    y_axis_categories = np.array(y_categories)
+    x_axis_categories = np.array(x_categories)
+    y_axis_buildings = np.array(y_buildings)
+    x_axis_buildings = np.array(x_buildings)
+    ax1.barh(y_axis_categories, x_axis_categories)
+    ax2.barh(y_axis_buildings, x_axis_buildings)
+    ax1.set_ylabel('Categories')
+    ax1.set_xlabel('Ratings')
+    ax1.set_title('Average Restaurant Ratings by Category')
+    ax2.set_ylabel('Buildings')
+    ax2.set_xlabel('Ratings')
+    ax2.set_title('Average Restaurant Ratings by Building')
+    plt.show()
+    final_lst = []
+    final_lst.append(flipped_categories[-1])
+    final_lst.append(flipped_buildings[-1])
+    return final_lst
+
 
 #Try calling your functions here
 def main():
     loaded_data = load_rest_data('South_U_Restaurants.db')
     rest_categories = plot_rest_categories('South_U_Restaurants.db')
     find_building = find_rest_in_building(1140, 'South_U_Restaurants.db')
+    highest_rating = get_highest_rating('South_U_Restaurants.db')
 
 class TestHW8(unittest.TestCase):
     def setUp(self):
